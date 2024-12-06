@@ -1,0 +1,38 @@
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+
+      - name: Get the latest release ID from samfirm-action
+        id: get_latest_release
+        run: |
+          RESPONSE=$(curl -s https://api.github.com/repos/mazurikian/samfirm.js/releases/latest)
+          echo "Latest release info: $RESPONSE"
+          RELEASE_URL=$(echo $RESPONSE | jq -r .assets[0].browser_download_url)
+          echo "RELEASE_URL=$RELEASE_URL" >> $GITHUB_ENV
+
+      - name: Download the latest release
+        run: |
+          curl -L -o samfirm.tar.gz ${{ env.RELEASE_URL }}
+
+      - name: Extract the downloaded release
+        run: |
+          tar -xzvf samfirm.tar.gz -C .
+
+      - name: Run Node.js script
+        run: node .index.js -r ARO -m SM-A236M -i 358263681238947
