@@ -32,7 +32,7 @@ jobs:
 
       - name: Extract the downloaded release
         run: |
-          tar -xzvf samfirm.tar.gz -C . && df -h
+          tar -xzvf samfirm.tar.gz -C .
 
       - name: Run Node.js script
         run: node index.js -r ARO -m SM-A236M -i 358263681238947 && sudo apt install tree && tree
