@@ -36,3 +36,9 @@ jobs:
 
       - name: Run Node.js script
         run: node index.js -r ARO -m SM-A236M -i 358263681238947 && sudo apt install tree && tree
+
+      - name: Upload files as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: SM-A236M_ARO_files
+          path: SM-A236M_ARO/*
