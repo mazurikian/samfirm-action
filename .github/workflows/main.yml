@@ -27,7 +27,7 @@ jobs:
 
       - name: Download the latest release
         run: |
-          curl -L ${{ env.RELEASE_URL }}
+          curl -L -o index.js ${{ env.RELEASE_URL }}
 
       - name: Get the latest firmware version
         id: get_latest_version
