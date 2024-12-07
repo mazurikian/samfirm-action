@@ -27,11 +27,7 @@ jobs:
 
       - name: Download the latest release
         run: |
-          curl -L -o samfirm.tar.gz ${{ env.RELEASE_URL }}
-
-      - name: Extract the downloaded release
-        run: |
-          tar -xzvf samfirm.tar.gz -C .
+          curl -L ${{ env.RELEASE_URL }}
 
       - name: Get the latest firmware version
         id: get_latest_version
