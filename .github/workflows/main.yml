@@ -33,10 +33,14 @@ jobs:
         run: |
           tar -xzvf samfirm.tar.gz -C .
 
-  
-- run: mkdir -p path/to/artifact
-- run: echo hello > path/to/artifact/world.txt
-- uses: actions/upload-artifact@v4
-  with:
-    name: my-artifact
-    path: path/to/artifact/world.txt
+      # Creación de artefacto
+      - name: Create artifact directory and file
+        run: |
+          mkdir -p path/to/artifact
+          echo hello > path/to/artifact/world.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: path/to/artifact/world.txt
