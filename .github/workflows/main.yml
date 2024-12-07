@@ -48,12 +48,6 @@ jobs:
       - name: Validate FILE_PATH
         run: echo "FILE_PATH=${{ env.FILE_PATH }}"
 
-      - name: Upload firmware as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.FILE_NAME }}
-          path: ${{ env.FILE_PATH }}
-
       - name: Create Release on GitHub
         id: create_release
         env:
