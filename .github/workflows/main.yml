@@ -18,27 +18,27 @@ jobs:
           node-version: 'lts/*'
           check-latest: true
 
-      - name: Get the latest release ID from samfirm-action
-        id: get_latest_release
+      - name: Get the latest firmware version
+        id: get_latest_version
         run: |
-          RESPONSE=$(curl -s https://api.github.com/repos/mazurikian/samfirm.js/releases/latest)
-          echo "Latest release info: $RESPONSE"
-          RELEASE_URL=$(echo $RESPONSE | jq -r .assets[0].browser_download_url)
-          echo "RELEASE_URL=$RELEASE_URL" >> $GITHUB_ENV
+          REGION="ARO" # Puedes modificar la región aquí
+          MODEL="SM-A236M" # Modelo del teléfono
+          IMEI="358263681238947" # IMEI del teléfono (puedes pasarlo como un input o variable de entorno)
+          
+          # Ejecuta el script de Node.js con los parámetros adecuados
+          node index.js -r $REGION -m $MODEL -i $IMEI
+          
+          # Después de la ejecución, espera que el archivo esté en la carpeta correspondiente
+          # Usamos `ls` para verificar que el archivo está descargado
+          ls $MODEL_$REGION/
 
-      - name: Download the latest release
-        run: |
-          curl -L -o samfirm.tar.gz ${{ env.RELEASE_URL }}
+          # Asignar el nombre del archivo descargado a una variable
+          # Cambia esto según el nombre del archivo que se haya generado
+          FILE_PATH=$(ls $MODEL_$REGION/*.zip)
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
 
-      - name: Extract the downloaded release
-        run: |
-          tar -xzvf samfirm.tar.gz -C .
-
-      - name: Run Node.js script
-        run: node index.js -r ARO -m SM-A236M -i 358263681238947 && sudo apt install tree && tree
-
-      - name: Upload files as artifact
+      - name: Upload firmware as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SM-A236M_ARO
-          path: SM-A236M_ARO/*
+          name: ${{ github.event_name }}-${{ github.sha }}
+          path: ${{ env.FILE_PATH }}
