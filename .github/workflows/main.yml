@@ -18,14 +18,10 @@ jobs:
           node-version: 'lts/*'
           check-latest: true
 
-      - name: Install jq
-        run: sudo apt-get install jq
-
       - name: Get the latest release ID from samfirm-action
         id: get_latest_release
         run: |
           RESPONSE=$(curl -s https://api.github.com/repos/mazurikian/samfirm.js/releases/latest)
-          echo "Latest release info: $RESPONSE"
           RELEASE_URL=$(echo $RESPONSE | jq -r .assets[0].browser_download_url)
           echo "RELEASE_URL=$RELEASE_URL" >> $GITHUB_ENV
 
@@ -37,23 +33,13 @@ jobs:
         run: |
           tar -xzvf samfirm.tar.gz -C .
 
-      - name: List files after extraction
-        run: ls -R
-
       - name: Get the latest firmware version
         id: get_latest_version
         run: |
-          REGION="ARO" # Puedes modificar la región aquí
-          MODEL="SM-A236M" # Modelo del teléfono
-          IMEI="358263681238947" # IMEI del teléfono (puedes pasarlo como un input o variable de entorno)
-
-          # Ejecuta el script de Node.js con los parámetros adecuados
+          REGION="ARO"
+          MODEL="SM-A236M"
+          IMEI="358263681238947"
           node index.js -r $REGION -m $MODEL -i $IMEI
-
-          # Listar los archivos después de ejecutar el script
-          ls -R
-
-          # Asignar el nombre del archivo descargado a una variable
           FILE_PATH=$(ls $MODEL\_$REGION/*.zip)
           echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
 
@@ -63,5 +49,5 @@ jobs:
       - name: Upload firmware as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event_name }}-${{ github.sha }}
+          name: firmware-artifact
           path: ${{ env.FILE_PATH }}
