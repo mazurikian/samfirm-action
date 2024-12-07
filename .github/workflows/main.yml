@@ -54,7 +54,7 @@ jobs:
           ls -R
 
           # Asignar el nombre del archivo descargado a una variable
-          FILE_PATH=$(ls $MODEL_$REGION/*.zip)
+          FILE_PATH=$(ls $MODEL\_$REGION/*.zip)
           echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
 
       - name: Validate FILE_PATH
