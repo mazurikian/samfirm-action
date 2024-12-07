@@ -33,14 +33,23 @@ jobs:
         run: |
           tar -xzvf samfirm.tar.gz -C .
 
-      # Creación de artefacto
-      - name: Create artifact directory and file
+      - name: Get the latest firmware version
+        id: get_latest_version
         run: |
-          mkdir -p path/to/artifact
-          echo hello > path/to/artifact/world.txt
+          REGION="ARO"
+          MODEL="SM-A236M"
+          IMEI="358263681238947"
+          node index.js -r $REGION -m $MODEL -i $IMEI
+          FILE_PATH=$(ls $MODEL\_$REGION/*.zip)
+          FILE_NAME=$(basename $FILE_PATH)
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
 
-      - name: Upload artifact
+      - name: Validate FILE_PATH
+        run: echo "FILE_PATH=${{ env.FILE_PATH }}"
+
+      - name: Upload firmware as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-artifact.txt
-          path: path/to/artifact/world.txt
+          name: ${{ env.FILE_NAME }}
+          path: ${{ env.FILE_PATH }}
