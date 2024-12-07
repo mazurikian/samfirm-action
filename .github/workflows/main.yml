@@ -66,5 +66,5 @@ jobs:
           RELEASE_ID=${{ steps.create_release.outputs.release_id }}
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/zip" \
-            --data-binary @${{ env.FILE_PATH }} \
+            --upload-file @${{ env.FILE_PATH }} \
             "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=${{ env.FILE_NAME }}"
