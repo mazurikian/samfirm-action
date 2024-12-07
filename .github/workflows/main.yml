@@ -40,5 +40,5 @@ jobs:
       - name: Upload files as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SM-A236M_ARO_files
+          name: SM-A236M_ARO
           path: SM-A236M_ARO/*
