@@ -48,8 +48,22 @@ jobs:
       - name: Validate FILE_PATH
         run: echo "FILE_PATH=${{ env.FILE_PATH }}"
 
-      - name: Upload firmware as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.FILE_NAME }}
-          path: ${{ env.FILE_PATH }}
+      - name: Create Release on GitHub
+        id: create_release
+        run: |
+          VERSION="v$(date +'%Y%m%d%H%M%S')"
+          RESPONSE=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"tag_name": "'$VERSION'", "name": "'$VERSION'", "body": "Firmware release", "draft": false, "prerelease": false}' \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/releases)
+          echo "::set-output name=release_id::$(echo $RESPONSE | jq -r .id)"
+
+      - name: Upload firmware to GitHub Release
+        run: |
+          RELEASE_ID=${{ steps.create_release.outputs.release_id }}
+          FILE_PATH=${{ env.FILE_PATH }}
+          FILE_NAME=${{ env.FILE_NAME }}
+
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @$FILE_PATH \
+            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=$FILE_NAME"
