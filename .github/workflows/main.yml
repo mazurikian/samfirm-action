@@ -43,10 +43,6 @@ jobs:
           
           # Ejecuta el script de Node.js con los parámetros adecuados
           node index.js -r $REGION -m $MODEL -i $IMEI
-          
-          # Después de la ejecución, espera que el archivo esté en la carpeta correspondiente
-          # Usamos `ls` para verificar que el archivo está descargado
-          ls $MODEL_$REGION/
 
           # Asignar el nombre del archivo descargado a una variable
           # Cambia esto según el nombre del archivo que se haya generado
