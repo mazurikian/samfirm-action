@@ -10,57 +10,42 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4.1.0
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           check-latest: true
 
-      - name: Get the latest release ID from samfirm-action
-        id: get_latest_release
+      - name: Get the latest release URL
+        id: fetch_latest_release
         run: |
           RESPONSE=$(curl -s https://api.github.com/repos/mazurikian/samfirm.js/releases/latest)
-          RELEASE_URL=$(echo $RESPONSE | jq -r .assets[0].browser_download_url)
-          echo "RELEASE_URL=$RELEASE_URL" >> $GITHUB_ENV
+          echo "::set-output name=release_url::$(echo $RESPONSE | jq -r .assets[0].browser_download_url)"
 
       - name: Download the latest release
         run: |
-          curl -L -o index.js ${{ env.RELEASE_URL }}
+          curl -L -o index.js ${{ steps.fetch_latest_release.outputs.release_url }}
 
-      - name: Get the latest firmware version
-        id: get_latest_version
+      - name: Fetch firmware details
+        id: fetch_firmware
         run: |
           REGION="ARO"
           MODEL="SM-A236M"
           IMEI="358263681238947"
           node index.js -r $REGION -m $MODEL -i $IMEI
           FILE_PATH=$(ls $MODEL\_$REGION/*.zip)
-          FILE_NAME=$(basename $FILE_PATH)
-          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+          echo "::set-output name=file_path::$FILE_PATH"
+          echo "::set-output name=file_name::$(basename $FILE_PATH)"
 
-      - name: Validate FILE_PATH
-        run: echo "FILE_PATH=${{ env.FILE_PATH }}"
-
-      - name: Create Release on GitHub
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Validate firmware path
         run: |
-          VERSION="v$(date +'%Y%m%d%H%M%S')"
-          RESPONSE=$(curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-            -d "{\"tag_name\": \"$VERSION\", \"name\": \"$VERSION\", \"body\": \"Firmware release\", \"draft\": false, \"prerelease\": false}" \
-            https://api.github.com/repos/${{ github.repository }}/releases)
-          echo "::set-output name=release_id::$(echo $RESPONSE | jq -r .id)"
+          echo "Firmware path: ${{ steps.fetch_firmware.outputs.file_path }}"
+          echo "Firmware name: ${{ steps.fetch_firmware.outputs.file_name }}"
 
-      - name: Upload firmware to GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          RELEASE_ID=${{ steps.create_release.outputs.release_id }}
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Content-Type: application/zip" \
-            --upload-file @${{ env.FILE_PATH }} \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=${{ env.FILE_NAME }}"
+      - name: Upload firmware as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: ${{ steps.fetch_firmware.outputs.file_path }}
