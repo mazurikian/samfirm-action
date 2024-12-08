@@ -44,6 +44,12 @@ jobs:
           echo "Firmware path: ${{ steps.fetch_firmware.outputs.file_path }}"
           echo "Firmware name: ${{ steps.fetch_firmware.outputs.file_name }}"
 
+      - name: Extract firmware
+        run: |
+          mkdir -p firmware_extracted
+          unzip -o ${{ steps.fetch_firmware.outputs.file_path }} -d firmware_extracted
+          ls firmware_extracted
+
       - name: Upload firmware as artifact
         uses: actions/upload-artifact@v4.4.3
         with:
