@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.1.0
         with:
           node-version: 'lts/*'
           check-latest: true
@@ -45,7 +45,7 @@ jobs:
           echo "Firmware name: ${{ steps.fetch_firmware.outputs.file_name }}"
 
       - name: Upload firmware as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: firmware
           path: ${{ steps.fetch_firmware.outputs.file_path }}
